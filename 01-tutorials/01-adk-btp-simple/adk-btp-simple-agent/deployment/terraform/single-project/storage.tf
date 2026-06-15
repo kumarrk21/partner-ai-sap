@@ -11,13 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-applications:
-- name: currency-conversion-api
-  random-route: true
-  path: ./
-  memory: 1024M
-  disk_quota: 2G 
-  buildpacks: 
-  - python_buildpack
-  command: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+provider "google" {
+  project               = var.project_id
+  region                = var.region
+  user_project_override = true
+}
+
+resource "google_storage_bucket" "logs_data_bucket" {
+  name                        = "${var.project_id}-${var.project_name}-logs"
+  location                    = var.region
+  project                     = var.project_id
+  uniform_bucket_level_access = true
+
+  depends_on = [resource.google_project_service.services]
+}

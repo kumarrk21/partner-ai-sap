@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-applications:
-- name: currency-conversion-api
-  random-route: true
-  path: ./
-  memory: 1024M
-  disk_quota: 2G 
-  buildpacks: 
-  - python_buildpack
-  command: uvicorn main:app --host 0.0.0.0 --port $PORT
+"""
+You can add your unit tests here.
+This is where you test your business logic, including agent functionality,
+data processing, and other core components of your application.
+"""
+
+
+def test_dummy() -> None:
+    """Placeholder - replace with real tests."""
+    assert 1 == 1

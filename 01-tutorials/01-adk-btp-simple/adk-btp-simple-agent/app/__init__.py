@@ -11,13 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-applications:
-- name: currency-conversion-api
-  random-route: true
-  path: ./
-  memory: 1024M
-  disk_quota: 2G 
-  buildpacks: 
-  - python_buildpack
-  command: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+from .agent import app
+
+__all__ = ["app"]

@@ -21,3 +21,6 @@ __MACOSX/
 local/
 .Trashes
 .TemporaryItems
+deployment_metadata.json
+.env
+.venv

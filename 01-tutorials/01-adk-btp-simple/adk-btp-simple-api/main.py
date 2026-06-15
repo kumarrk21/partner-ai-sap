@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.openapi.utils import get_openapi
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 
 # ----------------------------------------------------- #
@@ -24,7 +27,31 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'], # Disable this in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 FRANKFURTER_API_URL = "https://api.frankfurter.app/latest"
+
+# ----------------------------------------------------- #
+# OpenAPI spec endpoint
+# ----------------------------------------------------- #
+@app.get("/apispec.json",  include_in_schema=False)
+async def get_open_api_endpoint(request: Request):
+    base_url = str(request.base_url).rstrip("/")
+    openapi_schema = get_openapi(
+        title="Currency Conversion API",
+        version="1.0.0",
+        routes=app.routes,
+    )
+
+    openapi_schema["servers"] = [{"url": base_url}]
+    return JSONResponse(content=openapi_schema)
+
 # ----------------------------------------------------- #
 # BTP API Endpoint
 # ----------------------------------------------------- #
@@ -53,4 +80,3 @@ async def convert_currency(
         raise HTTPException(status_code=400, detail=f"Error from Frankfurter API: {e.response.text}")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error while connecting to the conversion service.")
-

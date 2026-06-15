@@ -11,13 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-applications:
-- name: currency-conversion-api
-  random-route: true
-  path: ./
-  memory: 1024M
-  disk_quota: 2G 
-  buildpacks: 
-  - python_buildpack
-  command: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+terraform {
+  required_version = ">= 1.0.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 7.13.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.7.0"
+    }
+  }
+}
+
+provider "google" {
+  alias                 = "billing_override"
+  billing_project       = var.project_id
+  region = var.region
+  user_project_override = true
+}

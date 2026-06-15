@@ -11,13 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-applications:
-- name: currency-conversion-api
-  random-route: true
-  path: ./
-  memory: 1024M
-  disk_quota: 2G 
-  buildpacks: 
-  - python_buildpack
-  command: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+import uuid
+from typing import (
+    Literal,
+)
+
+from pydantic import (
+    BaseModel,
+    Field,
+)
+
+
+class Feedback(BaseModel):
+    """Represents feedback for a conversation."""
+
+    score: int | float
+    text: str | None = ""
+    log_type: Literal["feedback"] = "feedback"
+    service_name: Literal["adk-btp-simple-agent"] = "adk-btp-simple-agent"
+    user_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
