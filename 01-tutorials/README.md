@@ -9,7 +9,8 @@ This repository offers a curated path of tutorials, beginning with the fundament
 
 | Module | Description |
 | :--- | :--- |
-| [**`01-adk-btp-simple`**](./01-adk-btp-simple) | In this tutorial, you will learn how to build a simple **Google Cloud Agent Development Kit (ADK)** agent that interacts with an SAP BTP service. You will build a Python API on SAP BTP to convert currencies, secure it with SAP's UAA, and deploy it to the Cloud Foundry runtime. This establishes a foundation for more complex integrations where SAP processes and data are exposed to AI agents. 
+| [**`01-adk-btp-simple`**](./01-adk-btp-simple) | In this tutorial, you will learn how to build a simple **Google Cloud Agent Development Kit (ADK)** agent that interacts with an SAP BTP service. You will build a python based REST API on SAP BTP to convert currencies and deploy it to the BTP Cloud Foundry runtime. Then, you will consume that API through the ADK agent. This establishes a foundation for more complex integrations where SAP processes and data are exposed to AI agents. 
+| [**`02-adk-btp-secure`**](./02-adk-btp-secure) | In this tutorial, you will secure the REST API you created in the previous tutorial with BTP XSUAA service and then use the ADK agent to interact with it using OAuth access tokens. You will also register the ADK agent with Gemini Enterprise and interact with it using natural language to demonstrate how to securely integrate your AI agents with SAP BTP services.
 
 ---
 

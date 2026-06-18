@@ -1,0 +1,26 @@
+{
+    "xsappname": "currency-conversion-api",
+    "tenant-mode": "dedicated",
+    "scopes": [
+        {
+            "name": "uaa.user",
+            "description": "UAA"
+        }
+    ],
+    "role-templates": [
+        {
+            "name": "Token_Exchange",
+            "description": "UAA",
+            "scope-references": [
+                "uaa.user"
+            ]
+        }
+    ],
+    "oauth2-configuration": {
+        "redirect-uris": [
+            "https://*.cfapps.us30.hana.ondemand.com/**",
+            "https://vertexaisearch.cloud.google.com/oauth-redirect",
+            "http://localhost:3000/**"
+        ]
+    }
+}

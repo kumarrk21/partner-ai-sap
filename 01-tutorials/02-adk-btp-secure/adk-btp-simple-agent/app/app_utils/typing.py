@@ -12,16 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-[project]
-name = "adk-btp-simple-api"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "cfenv>=0.5.3",
-    "fastapi>=0.137.1",
-    "requests>=2.34.2",
-    "sap-xssec>=4.2.2",
-    "uvicorn>=0.49.0",
-]
+import uuid
+from typing import (
+    Literal,
+)
+
+from pydantic import (
+    BaseModel,
+    Field,
+)
+
+
+class Feedback(BaseModel):
+    """Represents feedback for a conversation."""
+
+    score: int | float
+    text: str | None = ""
+    log_type: Literal["feedback"] = "feedback"
+    service_name: Literal["adk-btp-simple-agent"] = "adk-btp-simple-agent"
+    user_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))

@@ -19,7 +19,7 @@ from google.genai import types
 
 import os
 import google.auth
-from google.adk.tools.openapi_tool.openapi_spec_parser.openapi_toolset import OpenAPIToolset
+from google.adk.tools.openapi_tool import OpenAPIToolset
 from pathlib import Path
 
 _, project_id = google.auth.default()

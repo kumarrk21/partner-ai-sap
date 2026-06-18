@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-[project]
-name = "adk-btp-simple-api"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "cfenv>=0.5.3",
-    "fastapi>=0.137.1",
-    "requests>=2.34.2",
-    "sap-xssec>=4.2.2",
-    "uvicorn>=0.49.0",
-]
+---
+applications:
+- name: currency-conversion-api
+  random-route: true
+  path: ./
+  memory: 1024M
+  disk_quota: 2G 
+  buildpacks: 
+  - python_buildpack
+  command: uvicorn main:app --host 0.0.0.0 --port $PORT
+  services:
+  - adk-demos
+  env:
+    BTP_XSUAA_SERVICE: "adk-demos"

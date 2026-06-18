@@ -1,0 +1,135 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse, parse_qs
+import webbrowser
+import requests
+
+#------------------------------------------------------------------------#
+# Globals
+#------------------------------------------------------------------------#
+XSUAA_URL = os.getenv("XSUAA_URL")
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+CURRENCY_CONVERSION_API_URL = os.getenv("CURRENCY_CONVERSION_API_URL")
+REDIRECT_URI = "http://localhost:3000/callback"
+
+# Global variable to store the code received by the web server
+auth_code = None
+
+#------------------------------------------------------------------------#
+# Callback handler for a 3-legged OAuth flow
+#------------------------------------------------------------------------#
+class CallbackHandler(BaseHTTPRequestHandler):
+    """A simple local web server to catch the redirect from Salesforce."""
+    
+    def do_GET(self):
+        global auth_code
+        query_components = parse_qs(urlparse(self.path).query)
+        
+        if 'code' in query_components:
+            auth_code = query_components['code'][0]
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            # Send a success message to the browser
+            self.wfile.write(b"<html><body><h1>Authentication successful!</h1><p>You can close this tab and return to your terminal.</p></body></html>")
+        else:
+            self.send_response(400)
+            self.end_headers()
+            
+    def log_message(self, format, *args):
+        # Suppress standard HTTP server logging to keep terminal clean
+        pass
+
+
+#------------------------------------------------------------------------#
+# Get Access token from 3 legged flow
+#------------------------------------------------------------------------#
+def get_access_token_3_legged():
+    """Authenticates using the 3-Legged Authorization Code Flow."""
+    global auth_code
+    
+    # 1. Start a local server to listen for the Salesforce callback
+    server_address = ('localhost', 3000)
+    httpd = HTTPServer(server_address, CallbackHandler)
+    
+    # 2. Construct the authorization URL
+    auth_url = XSUAA_URL + "/oauth/authorize"
+    
+    auth_request_url = (
+        f"{auth_url}?response_type=code"
+        f"&client_id={CLIENT_ID}"
+        f"&redirect_uri={REDIRECT_URI}"
+    )
+    
+    # 3. Open the user's default web browser
+    print("Opening browser for BTP authentication...")
+    webbrowser.open(auth_request_url)
+    
+    # 4. Wait for exactly one request (the callback)
+    print("Waiting for authorization callback on port 3000...")
+    httpd.handle_request() 
+    
+    if not auth_code:
+        raise Exception("Failed to retrieve the authorization code.")
+        
+    print("Authorization code received! Exchanging for access token...")
+    
+    # 5. Exchange the authorization code for an Access Token
+    payload = {
+        'grant_type': 'authorization_code',
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'redirect_uri': REDIRECT_URI,
+        'code': auth_code
+    }
+    
+    token_url = XSUAA_URL + "/oauth/token"
+    response = requests.post(token_url, data=payload)
+    response.raise_for_status() 
+    
+    token_data = response.json()
+    return token_data['access_token']
+
+#------------------------------------------------------------------------#
+# Convert currencies
+#------------------------------------------------------------------------#
+def convert_currencies(access_token, amount, source_currency, target_currency):
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json'
+    }
+
+    query_params = {"amount": str(amount), "from_currency": source_currency, "to_currency": target_currency}  
+    
+    response = requests.get(f"{CURRENCY_CONVERSION_API_URL}/convert", headers=headers, params=query_params)
+    response.raise_for_status() 
+    return response.json()
+
+#------------------------------------------------------------------------#
+# Main method
+#------------------------------------------------------------------------#
+def main():
+    access_token = get_access_token_3_legged()
+    response = convert_currencies(access_token, 100, "usd", "eur")
+    print("Conversion result: ", response)
+
+#------------------------------------------------------------------------#
+# Entry 
+#------------------------------------------------------------------------#
+if __name__ == "__main__":
+    main()
